@@ -1,3 +1,12 @@
+-- 0. Tabla sucursales
+CREATE TABLE sucursales (
+    id SERIAL PRIMARY KEY,
+     nombre VARCHAR(100) NOT NULL,
+    direccion VARCHAR(255),
+    telefono VARCHAR(20),
+    email VARCHAR(100)
+);
+
 -- 1. Tabla roles
 CREATE TABLE roles (
     id SERIAL PRIMARY KEY,
@@ -5,33 +14,19 @@ CREATE TABLE roles (
     descripcion TEXT
 );
 
--- 2. Tabla permisos
-CREATE TABLE permisos (
-    id SERIAL PRIMARY KEY,
-    nombre VARCHAR(50) UNIQUE NOT NULL,
-    descripcion TEXT
-);
-
--- 3. Tabla rol_permisos (Relación muchos a muchos)
-CREATE TABLE rol_permisos (
-    rol_id INT NOT NULL,
-    permiso_id INT NOT NULL,
-    PRIMARY KEY (rol_id, permiso_id),
-    FOREIGN KEY (rol_id) REFERENCES roles(i         d) ON DELETE CASCADE,
-    FOREIGN KEY (permiso_id) REFERENCES permisos(id) ON DELETE CASCADE
-);
-
 -- 4. Tabla usuarios
 CREATE TABLE usuarios (
-    id SERIAL PRIMARY KEY,
-    nombre_usuario VARCHAR(50) UNIQUE NOT NULL,
-    contrasena VARCHAR(255) NOT NULL,
+    CURP VARCHAR(19 ) PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
     nombre_completo VARCHAR(100) NOT NULL,
     numero_telefono VARCHAR(20),
     rol_id INT NOT NULL,
+    sucursal_id INT NOT NULL,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (rol_id) REFERENCES roles(id)
-);
+    FOREIGN KEY (rol_id) REFERENCES roles(id),
+    FOREIGN KEY(sucursal_id) REFERENCES sucursal(id)
+);  
 
 -- 5. Tabla categorias_clientes
 CREATE TABLE categorias_clientes (
@@ -71,9 +66,11 @@ CREATE TABLE transacciones_puntos (
 );
 
 -- 8. Tabla categorias_productos
-CREATE TABLE categorias_productos (
+CREATE TABLE grupos_productos (
     id SERIAL PRIMARY KEY,
-    nombre VARCHAR(50) UNIQUE NOT NULL
+    grupos VARCHAR(50) UNIQUE NOT NULL,
+    clave_sat VARCHAR(50),
+    descripcion VARCHAR(200)
 );
 
 -- 9. Tabla productos
@@ -85,18 +82,10 @@ CREATE TABLE productos (
     peso DECIMAL(10,2), 
     precio_unitario DECIMAL(12,2),
     precio_por_kg DECIMAL(12,2),
-    clave_sat VARCHAR(50),
+    largo DECIMAL(12,2),
     categoria_producto_id INT,
-    FOREIGN KEY (categoria_producto_id) REFERENCES categorias_productos(id)
-);
-
--- 10. Tabla sucursales
-CREATE TABLE sucursales (
-    id SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    direccion VARCHAR(255),
-    telefono VARCHAR(20),
-    email VARCHAR(100)
+    descripcion VARCHAR(200),
+    FOREIGN KEY (categoria_producto_id) REFERENCES grupos_productos(id)
 );
 
 -- 11. Tabla inventarios
@@ -120,7 +109,7 @@ CREATE TABLE ventas (
     fecha_venta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     total DECIMAL(12,2),
     descuento_aplicado DECIMAL(12,2),
-    tipo_pago VARCHAR(50),
+    tipo_pago VARCHAR(50) DEFAULT 'Efectivo',
     estado VARCHAR(50) DEFAULT 'Completada',
     FOREIGN KEY (cliente_id) REFERENCES clientes(id),
     FOREIGN KEY (sucursal_id) REFERENCES sucursales(id),
@@ -151,6 +140,13 @@ CREATE TABLE devoluciones (
     FOREIGN KEY (producto_id) REFERENCES productos(id)
 );
 
+
+-- departamentos
+CREATE TABLE departamentos(
+  id SERIAL PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL
+)
+
 -- 15. Tabla proveedores
 CREATE TABLE proveedores (
     id SERIAL PRIMARY KEY,
@@ -158,7 +154,11 @@ CREATE TABLE proveedores (
     direccion VARCHAR(255),
     telefono VARCHAR(20),
     email VARCHAR(100),
-    informacion_general TEXT
+    departamento_id INT NOT NULL,
+    informacion_general TEXT,
+    limite_credito INTEGER, -- cantidad de credito que el proveedor puede otorgar en la compa de productos
+    credito_disponible INTEGER, -- calculo de la cantidad de credito aun disponible con este proveedor                                                                  
+    FOREIGN KEY (departamento_id) REFERENCES departamentos(id),
 );
 
 -- 16. Tabla compras
@@ -170,7 +170,7 @@ CREATE TABLE compras (
     fecha_compra TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     total DECIMAL(12,2),
     tipo_compra VARCHAR(50),
-    incluye_iva BOOLEAN DEFAULT FALSE,
+    incluye_iva BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (proveedor_id) REFERENCES proveedores(id),
     FOREIGN KEY (sucursal_id) REFERENCES sucursales(id),
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
@@ -229,7 +229,7 @@ CREATE TABLE facturas (
     FOREIGN KEY (venta_id) REFERENCES ventas(id)
 );
 
--- 22. Tabla envios_facturas
+-- 22. Tabla envios_facturas: Almacena los datos para enviar un correo electrónico de la factura
 CREATE TABLE envios_facturas (
     id SERIAL PRIMARY KEY,
     factura_id INT NOT NULL,
@@ -238,32 +238,6 @@ CREATE TABLE envios_facturas (
     estado_envio VARCHAR(50) DEFAULT 'Enviado',
     mensaje TEXT,
     FOREIGN KEY (factura_id) REFERENCES facturas(id)
-);
-
--- 23. Tabla presupuestos
-CREATE TABLE presupuestos (
-    id SERIAL PRIMARY KEY,
-    cliente_id INT,
-    sucursal_id INT NOT NULL,
-    usuario_id INT NOT NULL,
-    fecha_presupuesto TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    total DECIMAL(12,2),
-    mostrar_precios_unitarios BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id),
-    FOREIGN KEY (sucursal_id) REFERENCES sucursales(id),
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
-);
-
--- 24. Tabla detalle_presupuestos
-CREATE TABLE detalle_presupuestos (
-    id SERIAL PRIMARY KEY,
-    presupuesto_id INT NOT NULL,
-    producto_id INT NOT NULL,
-    cantidad INT NOT NULL,
-    precio_unitario DECIMAL(12,2),
-    precio_total DECIMAL(12,2),
-    FOREIGN KEY (presupuesto_id) REFERENCES presupuestos(id) ON DELETE CASCADE,
-    FOREIGN KEY (producto_id) REFERENCES productos(id)
 );
 
 -- 25. Tabla fondo_ahorro
@@ -288,7 +262,21 @@ CREATE TABLE salarios (
     FOREIGN KEY (colaborador_id) REFERENCES usuarios(id)
 );
 
--- 27. Tabla gastos
+-- registo de pagos realizados a cuentas por pagar
+CREATE TABLE tipo_pagos (
+    id SERIAL PRIMARY KEY,
+    tipo VARCHAR(50) UNIQUE NOT NULL,
+
+);
+
+
+-- 27 Tabla de categoria gastos
+create table categoria_gastos(
+   id SERIAL PRIMARY KEY,
+   categoria_nombre varchar(200) -- gastos fijos, gastos varios, 
+);
+
+--  27.1 Tabla gastos
 CREATE TABLE gastos (
     id SERIAL PRIMARY KEY,
     sucursal_id INT NOT NULL,
@@ -299,7 +287,7 @@ CREATE TABLE gastos (
     FOREIGN KEY (sucursal_id) REFERENCES sucursales(id)
 );
 
--- 28. Tabla utilidades
+-- 28. Tabla utilidades: calculo de utilidades por mes
 CREATE TABLE utilidades (
     id SERIAL PRIMARY KEY,
     producto_id INT NOT NULL,
@@ -377,10 +365,4 @@ CREATE TABLE pedidos (
     fecha_entrega TIMESTAMP,
     FOREIGN KEY (venta_id) REFERENCES ventas(id),
     FOREIGN KEY (repartidor_id) REFERENCES usuarios(id)
-);
-
--- 35. Tabla tipo_pagos
-CREATE TABLE tipo_pagos (
-    id SERIAL PRIMARY KEY,
-    tipo VARCHAR(50) UNIQUE NOT NULL
 );
