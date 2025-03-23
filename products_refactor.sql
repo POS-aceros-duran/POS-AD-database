@@ -31,11 +31,6 @@
             nombre VARCHAR(100) NOT NULL,   
             id_categoria BIGINT NOT NULL,
             descripcion TEXT,
-            MedidaA DECIMAL(10,2),         -- En pulgadas (ej: 0.5 para 1/2")
-            MedidaB DECIMAL(10,2),         -- En pulgadas (para no cuadrados/redondos)
-            DiametroNominal VARCHAR(20),   -- Solo para tubos mecánicos (ej: "1/2\"")
-            Longitud DECIMAL(10,2) DEFAULT 6.10,  -- En metros
-            peso_pieza DECIMAL(10,2) DEFAULT 0,  -- Peso en kg
             clave_sat BIGINT,  -- Referencia a claves_sat
             norma_id BIGINT,  -- Referencia a catalogo_normas
             FOREIGN KEY (norma_id) REFERENCES catalogo_normas(id) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -64,7 +59,12 @@
         CREATE TABLE productos_variantes (
             id BIGINT PRIMARY KEY AUTO_INCREMENT,
             producto_id BIGINT NOT NULL,
-            calibre VARCHAR(10),          -- Ej: "20", "C12"
+            MedidaA DECIMAL(10,2),         -- En pulgadas (ej: 0.5 para 1/2")
+            MedidaB DECIMAL(10,2),         -- En pulgadas
+            DiametroNominal VARCHAR(20),   -- Solo para tubos mecánicos (ej: "1/2\"")
+            peso_pieza DECIMAL(10,2) DEFAULT 0,  -- Peso en kg
+            Longitud DECIMAL(10,2) DEFAULT 6.10,  -- En metros
+            calibre VARCHAR(10),                  -- Ej: "20", "C12"
             espesor DECIMAL(10,3),        -- En pulgadas (ej: 0.036)
             diametroExterior DECIMAL(10,2), -- Solo para tubos mecánicos
             diametroInterior DECIMAL(10,2), -- Solo para tubos mecánicos
