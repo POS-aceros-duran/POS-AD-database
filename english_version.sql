@@ -138,7 +138,7 @@ CREATE TABLE
 CREATE TABLE
     sat_keys (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        key VARCHAR(50) UNIQUE NOT NULL,
+        sat_key VARCHAR(50) UNIQUE NOT NULL,
         description VARCHAR(255)
     );
 
@@ -171,17 +171,6 @@ CREATE TABLE
         FOREIGN KEY (category_id) REFERENCES product_categories (id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
--- Product Images Table (1:N relationship)
-CREATE TABLE
-    product_images (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        product_id BIGINT NOT NULL,
-        image_path VARCHAR(255) NOT NULL,
-        is_primary BOOLEAN DEFAULT FALSE,
-        display_order BIGINT DEFAULT 0, -- For defining display order
-        FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
 -- Finishes Catalog Table
 CREATE TABLE
     finishes_catalog (
@@ -207,6 +196,17 @@ CREATE TABLE
         pieces_per_package INT, -- E.g., 231
         sku_code VARCHAR(50) UNIQUE, -- Unique identifier
         FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+-- Product variant Images Table (1:N relationship)
+CREATE TABLE
+    product_images (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        product_variant_id BIGINT NOT NULL,
+        image_path VARCHAR(255) NOT NULL,
+        is_primary BOOLEAN DEFAULT FALSE,
+        display_order BIGINT DEFAULT 0, -- For defining display order
+        FOREIGN KEY (product_variant_id) REFERENCES product_variants (id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
 -- Product Variant Finishes Table
