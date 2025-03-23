@@ -166,11 +166,9 @@ CREATE TABLE
         name VARCHAR(100) NOT NULL,
         category_id BIGINT NOT NULL,
         description TEXT,
-        sat_key BIGINT, -- Reference to sat_keys
         standard_id BIGINT, -- Reference to standards_catalog
         FOREIGN KEY (standard_id) REFERENCES standards_catalog (id) ON DELETE SET NULL ON UPDATE CASCADE,
-        FOREIGN KEY (category_id) REFERENCES product_categories (id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (sat_key) REFERENCES sat_keys (id) ON DELETE SET NULL ON UPDATE CASCADE
+        FOREIGN KEY (category_id) REFERENCES product_categories (id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
 -- Product Images Table (1:N relationship)

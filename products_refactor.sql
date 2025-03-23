@@ -31,11 +31,9 @@
             nombre VARCHAR(100) NOT NULL,   
             id_categoria BIGINT NOT NULL,
             descripcion TEXT,
-            clave_sat BIGINT,  -- Referencia a claves_sat
             norma_id BIGINT,  -- Referencia a catalogo_normas
             FOREIGN KEY (norma_id) REFERENCES catalogo_normas(id) ON DELETE SET NULL ON UPDATE CASCADE,
-            FOREIGN KEY (id_categoria) REFERENCES categorias(id) ON DELETE CASCADE ON UPDATE CASCADE,
-            FOREIGN KEY (clave_sat) REFERENCES claves_sat(id) ON DELETE SET NULL ON UPDATE CASCADE
+            FOREIGN KEY (id_categoria) REFERENCES categorias(id) ON DELETE CASCADE ON UPDATE CASCADE
         );
 
         -- Tabla de imágenes de producto (relación 1:N)
