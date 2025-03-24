@@ -138,7 +138,7 @@ CREATE TABLE
 CREATE TABLE
     sat_keys (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        sat_key VARCHAR(50) UNIQUE NOT NULL,
+        key VARCHAR(50) UNIQUE NOT NULL,
         description VARCHAR(255)
     );
 

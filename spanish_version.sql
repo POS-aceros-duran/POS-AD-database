@@ -173,17 +173,6 @@ CREATE TABLE
         FOREIGN KEY (clave_sat) REFERENCES claves_sat (id) ON DELETE SET NULL ON UPDATE CASCADE
     );
 
--- Tabla de imágenes de producto (relación 1:N)
-CREATE TABLE
-    producto_imagenes (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        id_producto BIGINT NOT NULL,
-        ruta_imagen VARCHAR(255) NOT NULL,
-        es_principal BOOLEAN DEFAULT FALSE,
-        orden BIGINT DEFAULT 0, -- Para definir el orden de visualización
-        FOREIGN KEY (id_producto) REFERENCES productos (id) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-
 -- Tabla catalogo de acabados
 CREATE TABLE
     catalogo_acabados (
@@ -209,6 +198,17 @@ CREATE TABLE
         piezasPorPaquete INT, -- Ej: 231
         codigoSKU VARCHAR(50) UNIQUE, -- Identificador único
         FOREIGN KEY (Producto_id) REFERENCES productos (id) ON DELETE CASCADE ON UPDATE CASCADE
+    );
+
+-- Tabla de imágenes de producto (relación 1:N)
+CREATE TABLE
+    producto_variante_imagenes (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        producto_variante_id BIGINT NOT NULL,
+        ruta_imagen VARCHAR(255) NOT NULL,
+        es_principal BOOLEAN DEFAULT FALSE,
+        orden BIGINT DEFAULT 0, -- Para definir el orden de visualización
+        FOREIGN KEY (producto_variante_id) REFERENCES productos_variantes (id) ON DELETE CASCADE ON UPDATE CASCADE
     );
 
 -- Tabla acabados-productos
